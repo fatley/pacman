@@ -13,6 +13,7 @@ from pacai.core.search.position import PositionSearchProblem
 from pacai.core.search.problem import SearchProblem
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.base import SearchAgent
+from pacai.core.directions import Directions
 
 class CornersProblem(SearchProblem):
     """
@@ -64,7 +65,39 @@ class CornersProblem(SearchProblem):
                 logging.warning('Warning: no food in corner ' + str(corner))
 
         # *** Your Code Here ***
-        raise NotImplementedError()
+        # changed to frozenset - immutable sets, can hash
+        self.reachedCorners = frozenset()
+
+    def startingState(self):
+        return (self.startingPosition, self.reachedCorners)
+        
+    def isGoal(self, state):
+        currentPosition, reachedCorners = state  # checks if pacmans position is in a corner
+        return set(reachedCorners) == set(self.corners)  # pacman in a corner == check
+    
+    def successorStates(self, state):
+        currentPosition, reachedCorners = state
+        successors = []
+
+        for action in Directions.CARDINAL:
+            x, y = currentPosition
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+
+            if not hitsWall:
+                nextPosition = (nextx, nexty)  # next position coords
+                nextCorners = set(reachedCorners)  # adds the next corner to reached corners
+
+                # if next position is corner, add to reached corners
+                if nextPosition in self.corners:
+                    nextCorners.add(nextPosition)
+                #  successor state that pacman can take
+                nextState = (nextPosition, frozenset(nextCorners))
+                # adds next state to successor list - cords, actiontaken, cost
+                successors.append((nextState, action, 1))
+
+        return successors
 
     def actionsCost(self, actions):
         """

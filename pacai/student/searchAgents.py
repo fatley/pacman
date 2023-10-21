@@ -8,14 +8,14 @@ Good luck and happy searching!
 import logging
 
 from pacai.core.actions import Actions
-from pacai.core.search import heuristic
 from pacai.core.search.position import PositionSearchProblem
 from pacai.core.search.problem import SearchProblem
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.base import SearchAgent
 from pacai.core.directions import Directions
 from pacai.core.distance import maze
-from pacai.util import priorityQueue
+from pacai.core.distance import manhattan
+from pacai.student.search import breadthFirstSearch
 
 class CornersProblem(SearchProblem):
     """
@@ -121,29 +121,29 @@ class CornersProblem(SearchProblem):
         return len(actions)
 
 def cornersHeuristic(state, problem):
-    """
-    A heuristic for the CornersProblem that you defined.
-
-    This function should always return a number that is a lower bound
-    on the shortest path from the state to a goal of the problem;
-    i.e. it should be admissible.
-    (You need not worry about consistency for this heuristic to receive full credit.)
-    """
-
-    # Useful information.
-    # corners = problem.corners  # These are the corner coordinates
-    # walls = problem.walls  # These are the walls of the maze, as a Grid.
-
-    # *** Your Code Here ***
-    # return heuristic.null(state, problem)  # Default to trivial solution
-    
-    # Figure which corners hasn't been visited and find closest corner from current position.
-    # Set that corner as the current position and continue on until all corners have been visited while also adding up path cost
-    
     corners = problem.corners
-    walls = problem.walls
-    visitedCorners = list()
+    # walls = problem.walls
+    currentPosition, visitedCorners = state
+    visitedCorners = set(visitedCorners)
+    unvisitedCorners = list(set(corners) - set(visitedCorners))
 
+    # finding closest corner
+    # using MD on current pos & corner then finding min distance
+    # no corners left to visit
+    if not unvisitedCorners:
+        return 0
+
+    lowerbound = 0
+    while unvisitedCorners:
+        distance = [manhattan(currentPosition, corner) for corner in unvisitedCorners]
+        closestDistance = min(distance)  # min dist on list of distances
+        closestCorner = unvisitedCorners[distance.index(closestDistance)]
+        lowerbound += closestDistance
+        currentPosition = closestCorner
+        unvisitedCorners.remove(closestCorner)
+
+    return lowerbound
+    
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -175,14 +175,16 @@ def foodHeuristic(state, problem):
 
     currentPosition, foodGrid = state
     food = foodGrid.asList()
-    # wall = problem.walls
     
     if not food:
         return 0
     
+    # uses maze() to compute dist between current pos & food
+    # maze - uses bfs
     distance = [maze(currentPosition, f, problem.startingGameState) for f in food]
     maxDistance = max(distance)
     
+    # gets # of walls in maze & stores into dict
     walls = problem.heuristicInfo.get('wallCount', 0)
     return maxDistance + walls
 
@@ -227,8 +229,11 @@ class ClosestDotSearchAgent(SearchAgent):
         # problem = AnyFoodSearchProblem(gameState)
 
         # *** Your Code Here ***
-        raise NotImplementedError()
-
+        # raise NotImplementedError()
+        problem = AnyFoodSearchProblem(gameState)
+        path = breadthFirstSearch(problem)
+        return path
+        
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
     A search problem for finding a path to any food.
@@ -255,6 +260,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
 
         # Store the food for later reference.
         self.food = gameState.getFood()
+
+    def isGoal(self, state):
+        x, y = state
+        return self.food[x][y]
 
 class ApproximateSearchAgent(BaseAgent):
     """

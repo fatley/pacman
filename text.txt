@@ -1,0 +1,101 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+Implement a heuristic for CornersProblem in pacai.student.searchAgents.cornersHeuristic. To test your code run:
+
+python3 -m pacai.bin.pacman --layout mediumCorners --pacman AStarCornersAgent
+
+Note: pacai.core.search.corners.AStarCornersAgent is an agent with these command line arguments:
+
+--pacman SearchAgent --agent-args fn=pacai.student.search.aStarSearch,prob=pacai.student.searchAgents.CornersProblem,heuristic=pacai.student.searchAgents.cornersHeuristic
+
+Grading: inadmissible heuristics will get no credit.
+
+1 point for any admissible heuristic
+2 point for expanding fewer than 1600 nodes
+3 point for expanding fewer than 1200 nodes
+Expand fewer than 800, and you're doing great!
+Hint: Remember, heuristic functions just return numbers, which, to be admissible, must be lower bounds on the actual shortest path cost to the nearest goal.
+
+
+def manhattan(position, problem):
+    """
+    This heuristic is the manhattan distance to the goal.
+    """
+
+    position1 = position
+    position2 = problem.goal
+
+    return distance.manhattan(position1, position2)
+
+
+
+
+def cornersHeuristic(state, problem):
+    corners = problem.corners
+    walls = problem.walls
+    currentPosition, visitedCorners = state
+    visitedCorners = set(visitedCorners)
+    unvisitedCorners = list(set(corners) - set(visitedCorners))  # finding corners that havent been visited
+    
+    # finding closest corner
+    # using MD on current pos & corner then finding min distance
+    
+    print("start: ", state)
+    print("goal: ", problem.isGoal)
+    
+    # no corners left to visit
+    if not unvisitedCorners:
+        return 0
+    
+    lowerbound = 0
+    print("curr pos:", currentPosition)
+    while unvisitedCorners:
+        distance = [manhattan(currentPosition, corner) for corner in unvisitedCorners]
+        closestDistance = min(distance) # min dist on list of distances
+        # closestCorner = unvisitedCorners[distance.index(closestDistance)] # closest uCorner
+        closestCorner = list(unvisitedCorners)[distance.index(closestDistance)]
+        lowerbound += closestDistance
+        visitedCorners.add(closestCorner)
+        currentPosition = closestCorner
+        unvisitedCorners = set(corners) - set(visitedCorners)
+    
+    return lowerbound
+        
+    
+Question 8 (2 points)
+Implement the function pacai.student.searchAgents.ClosestDotSearchAgent.findPathToClosestDot. Our agent solves this maze (suboptimally!) in under a second with a path cost of 350:
+
+python3 -m pacai.bin.pacman --layout bigSearch --pacman ClosestDotSearchAgent
+
+Hint: The quickest way to complete findPathToClosestDot is to complete pacai.student.searchAgents.AnyFoodSearchProblem. Then, solve that problem with an appropriate search function. The solution should be very short!
+
+Your ClosestDotSearchAgent won't always find the shortest possible path through the maze. If you don't understand why, ask the TAs! In fact, you can do better if you try.
+
+
+INFO - 2023-10-21 15:17:09,048 - Path found with total cost of 210 in 0.0 seconds
+INFO - 2023-10-21 15:17:09,048 - Search nodes expanded: 538
+INFO - 2023-10-21 15:17:23,249 - Pacman emerges victorious! Score: 300
+INFO - 2023-10-21 15:17:23,249 - Average Score: 300.0
+INFO - 2023-10-21 15:17:23,249 - Scores:        300
+INFO - 2023-10-21 15:17:23,250 - Win Rate:      1/1 (1.00)
+INFO - 2023-10-21 15:17:23,250 - Record:        Win
+
+
+INFO - 2023-10-21 15:18:53,012 - Path found with total cost of 210 in 0.0 seconds
+INFO - 2023-10-21 15:18:53,012 - Search nodes expanded: 538
+INFO - 2023-10-21 15:19:07,118 - Pacman emerges victorious! Score: 300
+INFO - 2023-10-21 15:19:07,119 - Average Score: 300.0
+INFO - 2023-10-21 15:19:07,119 - Scores:        300
+INFO - 2023-10-21 15:19:07,119 - Win Rate:      1/1 (1.00)
+INFO - 2023-10-21 15:19:07,119 - Record:        Win

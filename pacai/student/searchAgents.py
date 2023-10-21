@@ -14,6 +14,8 @@ from pacai.core.search.problem import SearchProblem
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.base import SearchAgent
 from pacai.core.directions import Directions
+from pacai.core.distance import maze
+from pacai.util import priorityQueue
 
 class CornersProblem(SearchProblem):
     """
@@ -133,7 +135,14 @@ def cornersHeuristic(state, problem):
     # walls = problem.walls  # These are the walls of the maze, as a Grid.
 
     # *** Your Code Here ***
-    return heuristic.null(state, problem)  # Default to trivial solution
+    # return heuristic.null(state, problem)  # Default to trivial solution
+    
+    # Figure which corners hasn't been visited and find closest corner from current position.
+    # Set that corner as the current position and continue on until all corners have been visited while also adding up path cost
+    
+    corners = problem.corners
+    walls = problem.walls
+    visitedCorners = list()
 
 def foodHeuristic(state, problem):
     """
@@ -164,11 +173,20 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount'].
     """
 
-    position, foodGrid = state
+    currentPosition, foodGrid = state
+    food = foodGrid.asList()
+    # wall = problem.walls
+    
+    if not food:
+        return 0
+    
+    distance = [maze(currentPosition, f, problem.startingGameState) for f in food]
+    maxDistance = max(distance)
+    
+    walls = problem.heuristicInfo.get('wallCount', 0)
+    return maxDistance + walls
 
-    # *** Your Code Here ***
-    return heuristic.null(state, problem)  # Default to the null heuristic.
-
+    
 class ClosestDotSearchAgent(SearchAgent):
     """
     Search for all food using a sequence of searches.

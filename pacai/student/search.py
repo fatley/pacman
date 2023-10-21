@@ -149,6 +149,9 @@ def aStarSearch(problem, heuristic):
     
     while not frontier.isEmpty():
         node, actions, path_cost = frontier.pop()
+        # frontier_set.remove(node)
+        if node not in frontier_set:
+            continue
         frontier_set.remove(node)
         
         if problem.isGoal(node):
@@ -165,9 +168,10 @@ def aStarSearch(problem, heuristic):
                     frontier_set.add(child)
                     priorities[child] = total_cost + heuristic(child, problem)
                 elif total_cost + heuristic(child, problem) < priorities[child]:
-                    frontier.update((child, actions + [action], total_cost),
+                    frontier.push((child, actions + [action], total_cost),
                         total_cost + heuristic(child, problem))
                     priorities[child] = total_cost + heuristic(child, problem)
     return None
+
     # *** Your Code Here ***
     # raise NotImplementedError()

@@ -78,6 +78,7 @@ class CornersProblem(SearchProblem):
         return set(reachedCorners) == set(self.corners)  # pacman in a corner == check
     
     def successorStates(self, state):
+        self._numExpanded = self._numExpanded + 1
         currentPosition, reachedCorners = state
         successors = []
 

@@ -2,7 +2,8 @@ import random
 
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.multiagent import MultiAgentSearchAgent
-
+from pacai.student.searchAgents import ClosestDotSearchAgent
+from pacai.core.distance import manhattan
 class ReflexAgent(BaseAgent):
     """
     A reflex agent chooses an action at each choice point by examining
@@ -57,9 +58,44 @@ class ReflexAgent(BaseAgent):
         # newScaredTimes = [ghostState.getScaredTimer() for ghostState in newGhostStates]
 
         # *** Your Code Here ***
+        newPosition = successorGameState.getPacmanPosition()
+        oldFood = successorGameState.getFood()
+        newGhostStates = successorGameState.getGhostStates()
+        newScaredTimes = [ghostState.getScaredTimer() for ghostState in newGhostStates]
+        capsules = successorGameState.getCapsules()
+        # walls
 
-        return successorGameState.getScore()
 
+        # distance to ghost using manhattan distance between agent and ghost
+        ghostDistance = [manhattan(newPosition, ghost.getPosition()) for ghost in newGhostStates]  
+        # food distance that agent should move closer to using manhattan between agent and food
+        foodDistance = [manhattan(newPosition, food) for food in oldFood.asList()]
+        # score
+        score = successorGameState.getScore()
+        
+        # if ghost is scared, agent should move away from ghost
+        for i in range(len(newGhostStates)):
+            if newScaredTimes[i] > 0:  # ghost is scared
+                score -= ghostDistance[i]  # move closer to ghost
+            else:  # ghost is not scared
+                score += ghostDistance[i]  # move away from ghost
+
+
+        if capsules:
+            capsuleDistance = [manhattan(newPosition, capsule) for capsule in capsules]
+            score -= min(capsuleDistance)  # move closer to capsule
+        
+        if foodDistance:
+            score -= min(foodDistance)  # move closer to food
+            
+        
+            
+        remainingFood = len(oldFood.asList())
+        score -= remainingFood  # move closer to food
+        
+        # return successorGameState.getScore()
+    
+    
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     A minimax agent.

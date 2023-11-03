@@ -62,7 +62,6 @@ class ReflexAgent(BaseAgent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.getScaredTimer() for ghostState in newGhostStates]
         
-
         # checking for each ghost
         # grabbing curr position of pacman & ghost
         oldPosition = currentGameState.getPacmanPosition()
@@ -125,9 +124,6 @@ class ReflexAgent(BaseAgent):
         
         return successorGameState.getScore()
     
-    
-    
-    
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     A minimax agent.
@@ -159,10 +155,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
         super().__init__(index, **kwargs)
         
     # get action func
-    # returns minimax action from current gameState using getTreeDepth and getEvaluationFunction 
+    # returns minimax action from current gameState using getTreeDepth and getEvaluationFunction
     # getTreeDepth - returns the depth of the search tree
     # getEvaluationFunction - returns the evaluation function for the search problem
-    # minimax - returns the minimax value of a state   
+    # minimax - returns the minimax value of a state
     def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
@@ -187,7 +183,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             for action in state.getLegalActions(agentIndex):
                 # eval = minimax( child, depth -1, false)
                 eval = self.minimax(state.generateSuccessor(agentIndex, action), depth - 1, 1)[0]
-                # comparing curent action (eval) w / highest action (maxeval) 
+                # comparing curent action (eval) w / highest action (maxeval)
                 if eval > maxEval:
                     maxEval = max(maxEval, eval)
                     maxAction = action
@@ -221,6 +217,49 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def __init__(self, index, **kwargs):
         super().__init__(index, **kwargs)
+        
+    def getAction(self, gameState):
+        """
+        Returns the minimax action from the current gameState using self.depth
+        and self.evaluationFunction.
+        """
+        
+        depth = self.getTreeDepth()
+        return self.minimax(gameState, depth, float("-inf"), float("inf"), 0)[1]
+        
+    # minimax function (positiionn, depth, alpha, beta, maximizing player)
+    def minimax(self, state, depth, alpha, beta, agentIndex):
+        if depth == 0 or state.isWin() or state.isLose():
+            return self._evaluationFunction(state), 'Stop'
+        
+        if agentIndex == 0:
+            maxEval = float("-inf")
+            maxAction = 'Stop'
+            for action in state.getLegalActions(agentIndex):
+                # eval = minimax(child, depth-1, alpha, beta, false)
+                eval = self.minimax(state.generateSuccessor(agentIndex, action),
+                                    depth - 1, alpha, beta, 1)[0]
+                alpha = max(alpha, eval)
+                if eval > maxEval:
+                    maxEval = max(maxEval, eval)
+                    maxAction = action
+                if beta <= alpha:
+                    break
+            return maxEval, maxAction
+        
+        else:
+            minEval = float("inf")
+            minAction = 'Stop'
+            for action in state.getLegalActions(agentIndex):
+                eval = self.minimax(state.generateSuccessor(agentIndex, action),
+                                    depth - 1, alpha, beta, 0)[0]
+                if eval < minEval:
+                    minEval = min(minEval, eval)
+                    minAction = action
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return minEval, minAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -238,6 +277,34 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def __init__(self, index, **kwargs):
         super().__init__(index, **kwargs)
+        
+    def getAction(self, state):
+        # returns expectimax ation from current gamestate using depth and evaluation function
+        depth = self.getTreeDepth()
+        return self.expectimax(state, depth, 0)[1]
+    
+    def expectimax(self, state, depth, agentIndex):
+        if depth == 0 or state.isWin() or state.isLose():
+            return self._evaluationFunction(state), None
+        
+        if agentIndex == 0:
+            maxEval = float("-inf")
+            for action in state.getLegalActions(agentIndex):
+                eval = self.expectimax(state.generateSuccessor(agentIndex, action), depth - 1, 1)[0]
+                if eval > maxEval:
+                    maxEval = max(maxEval, eval)
+                    maxAction = action
+            return maxEval, maxAction
+        else:
+            sumEval = 0
+            actions = state.getLegalActions(agentIndex)
+            for action in actions:
+                nextAgent = (agentIndex + 1) % state.getNumAgents()
+                nextDepth = depth - 1 if agentIndex == state.getNumAgents() - 1 else depth
+                eval, _ = self.expectimax(state.generateSuccessor(agentIndex, action), nextDepth, nextAgent)
+                sumEval += eval
+            return sumEval / len(actions), None
+            
 
 def betterEvaluationFunction(currentGameState):
     """

@@ -2,7 +2,6 @@ import random
 
 from pacai.agents.base import BaseAgent
 from pacai.agents.search.multiagent import MultiAgentSearchAgent
-from pacai.student.searchAgents import ClosestDotSearchAgent
 from pacai.core.distance import manhattan
 class ReflexAgent(BaseAgent):
     """
@@ -59,41 +58,54 @@ class ReflexAgent(BaseAgent):
 
         # *** Your Code Here ***
         newPosition = successorGameState.getPacmanPosition()
-        oldFood = successorGameState.getFood()
+        oldFood = currentGameState.getFood()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.getScaredTimer() for ghostState in newGhostStates]
-        capsules = successorGameState.getCapsules()
-        # walls
-
-
-        # distance to ghost using manhattan distance between agent and ghost
-        ghostDistance = [manhattan(newPosition, ghost.getPosition()) for ghost in newGhostStates]  
-        # food distance that agent should move closer to using manhattan between agent and food
-        foodDistance = [manhattan(newPosition, food) for food in oldFood.asList()]
-        # score
-        score = successorGameState.getScore()
-        
-        # if ghost is scared, agent should move away from ghost
-        for i in range(len(newGhostStates)):
-            if newScaredTimes[i] > 0:  # ghost is scared
-                score -= ghostDistance[i]  # move closer to ghost
-            else:  # ghost is not scared
-                score += ghostDistance[i]  # move away from ghost
-
-
+        # capsules
+        capsules = currentGameState.getCapsules()
         if capsules:
-            capsuleDistance = [manhattan(newPosition, capsule) for capsule in capsules]
-            score -= min(capsuleDistance)  # move closer to capsule
+            closestCapsule = min([manhattan(newPosition, capsule) for capsule in capsules])
+            if closestCapsule == 0:
+                return successorGameState.getScore() + 1
+            else:
+                return successorGameState.getScore() + 1 / closestCapsule
         
-        if foodDistance:
-            score -= min(foodDistance)  # move closer to food
+        # if the ghost is scared, eat everythign in sight while the ghost is scared
+        if newScaredTimes[0] > 0:
+            foodList = oldFood.asList()
+            if foodList:
+                closestFood = min([manhattan(newPosition, food) for food in foodList])
+                if closestFood == 0:
+                    return successorGameState.getScore() + 1
+                else:
+                    return successorGameState.getScore() + 1 / closestFood
+            else:
+                return successorGameState.getScore() + 1000
+        
+        # if there are no capsules, carry on with normal routine
+        # checking for food
+        foodList = oldFood.asList()
+        if foodList:
+            closestFood = min([manhattan(newPosition, food) for food in foodList])
+            if closestFood == 0:
+                return successorGameState.getScore() + 1
+            else:
+                return successorGameState.getScore() + 1 / closestFood
+    
+        # checking for ghost
+        ghostWeight = -1.5
+        for ghostState in newGhostStates:
+            ghostDistance = manhattan(newPosition, ghostState.getPosition())
+            if ghostDistance < 2:
+                score += ghostWeight / (ghostDistance + 1)
+            # if ghostState.getPosition() < 2:
+            #     return float("-inf")
             
+        # if there are no ghost, eat all teh food around
+        if not any(ghostState.getPosition() < 3 for ghostState in newGhostStates):
+            return successorGameState.getScore() + 1000
         
-            
-        remainingFood = len(oldFood.asList())
-        score -= remainingFood  # move closer to food
-        
-        # return successorGameState.getScore()
+        return successorGameState.getScore()
     
     
 class MinimaxAgent(MultiAgentSearchAgent):

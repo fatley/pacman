@@ -48,33 +48,33 @@ Don't spend too much time on this question, though, as the meat of the project l
 
 
 
-def getCapsules(self):
-    """
-    Returns a list of positions (x, y) of the remaining capsules.
-    """
-
-    return self._capsules
 
 
-def getAgentPosition(self, index):
-    """
-    Returns a location tuple of the agent with the given index.
-    It is possible for this method to return None if the agent's position is unknown
-    (like if it just died and is respawning).
-    """
 
-    position = self._agentStates[index].getPosition()
-    if (position is None):
-        return None
+Position of Pacman: This is the current position of your agent. 
+You can get this information from the game state.
 
-    # Ensure positions are ints.
-    return tuple(int(pos) for pos in position)
+Positions of Ghosts: Knowing where the ghosts are can help the agent avoid them. 
+You can get this information from the game state.
 
-    def getFood
-(
-self)
-Returns a Grid of boolean food indicator variables.
+Positions of Food: The agent needs to know where the food is in order to eat it.
+You can get this information from the game state.
 
-Grids can be accessed via list notation. So to check if there is food at (x, y), just do something like: food[x][y].
+Distances to Ghosts: The agent should try to keep a safe distance from the ghosts. 
+You can calculate this using the Manhattan distance between the agent and each ghost.
 
-Callers should favor hasFood() over this, since this will make a copy of the grid.
+Distances to Food: The agent should try to move towards the closest food. 
+You can calculate this using the Manhattan distance between the agent and each food pellet.
+
+Ghost States: The agent should know whether a ghost is in a scared state or not. 
+If a ghost is scared, the agent can eat it. Otherwise, the agent should avoid it.
+
+Scared Times: The agent should know how much time is left for each scared ghost. 
+This can help the agent decide whether to chase a scared ghost or avoid it.
+
+
+closest food from board
+checked for ghost: any ghost that are close to you
+if distance between ghost and me and less than (some #), then
+add that to score
+add or sub a certain amt to the minimum food distance and ghost distance, then divide that by score

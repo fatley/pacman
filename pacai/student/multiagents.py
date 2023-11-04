@@ -296,25 +296,100 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                     maxAction = action
             return maxEval, maxAction
         else:
-            sumEval = 0
+            totalEval = 0
             actions = state.getLegalActions(agentIndex)
             for action in actions:
+                # agent + 1 -> next agent, ghost - 1 + 1 % 2 = 0  -- pacman turn
                 nextAgent = (agentIndex + 1) % state.getNumAgents()
+                # if curr agent is last ghost, -1 from depth
                 nextDepth = depth - 1 if agentIndex == state.getNumAgents() - 1 else depth
-                eval, _ = self.expectimax(state.generateSuccessor(agentIndex, action), nextDepth, nextAgent)
-                sumEval += eval
-            return sumEval / len(actions), None
+                eval, _ = self.expectimax(state.generateSuccessor(agentIndex, action),
+                                          nextDepth, nextAgent)
+                totalEval += eval
+            return totalEval / len(actions), None
             
-
 def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable evaluation function.
-
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: this evaluation function takes into account the following: pacman's
+    position, ghost's position, food, and capsules
+    - capsules: if there are capsules left, pacman is encouraged to eat them by
+    adding 500 to the score.
+    - food: gets the list of the food where it'll use manhattan to check the current distance
+    from pacman to the food.
+    - pacman position: if pacman is close to a ghost, he is discouraged from going near the ghost
+    - ghost: if the ghost is scared, pacman is encouraged to go near ghost to gobble
     """
-
-    return currentGameState.getScore()
-
+    newPosition = currentGameState.getPacmanPosition()
+    oldFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.getScaredTimer() for ghostState in newGhostStates]
+    
+    score = currentGameState.getScore()
+    
+    oldPosition = currentGameState.getPacmanPosition()
+    oldGhostStates = currentGameState.getGhostStates()
+    # for each ghost, check if the new position is closer than the old position
+    for oldGhostState, newGhostState in zip(oldGhostStates, newGhostStates):
+        oldGhostPosition = oldGhostState.getPosition()
+        newGhostPosition = newGhostState.getPosition()
+            
+        # if the new position is closer than the old position, then return -inf
+        oldDistance = manhattan(oldPosition, oldGhostPosition)
+        newDistance = manhattan(newPosition, newGhostPosition)
+            
+        if newDistance < 2 and newDistance < oldDistance:
+            return float("-inf")
+    
+    foodList = oldFood.asList()
+    if foodList:
+        closestFood = min([manhattan(newPosition, food) for food in foodList])
+        if closestFood == 0:
+            return score + 1
+        else:
+            return score + 1 / closestFood
+    # no ghost around
+    for ghostState in newGhostStates:
+        if manhattan(newPosition, ghostState.getPosition()) < 2:
+            return float("-inf")
+            
+    # if there are no ghost, eat all teh food around
+    if not any(manhattan(newPosition, ghostState.getPosition())
+               < 3 for ghostState in newGhostStates):
+        return score + 1000
+        
+    # if ghost is close to pacman
+    for ghostState in newGhostStates:
+        if manhattan(newPosition, ghostState.getPosition()) < 2:
+            score -= 1000
+            
+    if newScaredTimes[0] > 0:
+        foodList = oldFood.asList()
+        if foodList:
+            closestFood = min([manhattan(newPosition, food) for food in foodList])
+            if closestFood == 0:
+                return score + 1
+            else:
+                return score + 1 / closestFood
+        else:
+            return score + 1000
+            
+    score -= len(foodList)
+    capsules = currentGameState.getCapsules()
+    if capsules:
+        closestCapsule = min(capsules, key=lambda capsule: manhattan(newPosition, capsule))
+        for ghostState in newGhostStates:
+            if manhattan(ghostState.getPosition(), closestCapsule) < 2:
+                foodList = oldFood.asList()
+                if foodList:
+                    closestFood = min([manhattan(newPosition, food) for food in foodList])
+                    if closestFood == 0:
+                        return score + 1
+                    else:
+                        return score + 1 / closestFood
+    
+    return score
+    
 class ContestAgent(MultiAgentSearchAgent):
     """
     Your agent for the mini-contest.

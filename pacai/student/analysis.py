@@ -15,7 +15,7 @@ def question2():
     """
 
     answerDiscount = 0.9
-    answerNoise = 0.2
+    answerNoise = 0.1
 
     return answerDiscount, answerNoise
 

@@ -85,13 +85,10 @@ def question3e():
 
 def question6():
     """
-    [Enter a description of what you did here.]
+    Every combo I put failed so I just returned NOT_POSSIBLE
     """
 
-    answerEpsilon = 0.3
-    answerLearningRate = 0.5
-
-    return answerEpsilon, answerLearningRate
+    return NOT_POSSIBLE
 
 if __name__ == '__main__':
     questions = [

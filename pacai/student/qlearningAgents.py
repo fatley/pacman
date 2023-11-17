@@ -104,7 +104,7 @@ class QLearningAgent(ReinforcementAgent):
         # if no legal actions (tstate), return None
         # if there are legal actions in state, return action with max qval
         if len(self.getLegalActions(state)) != 0:
-            return max([(self.getQValue(state, action), action) 
+            return max([(self.getQValue(state, action), action)
                         for action in self.getLegalActions(state)])[1]
         else:
             return None
@@ -141,9 +141,10 @@ class QLearningAgent(ReinforcementAgent):
         # take a random action and take best policy action otherwise
         # if no legal actions, return None
         # epilson - exploration rate
-        # You can choose an element from a list uniformly at random by calling the random.choice function. 
-        # You can simulate a binary variable with probability p of success 
-        # by using pacai.util.probability.flipCoin, which returns True with probability p and False with probability 1 - p.
+        # can choose an element from a list uniformly at random by calling the random.choice
+        # can simulate a binary variable with probability p of success
+        # by using pacai.util.probability.flipCoin,
+        # which returns True with probability p and False with probability 1 - p.
 
         if len(self.getLegalActions(state)) == 0:
             return None

@@ -1,80 +1,42 @@
-Question 1 (3 points)
-Improve the ReflexAgent to play respectably. 
-Reflex agent provides some helpful methods that call 
-into GameState for information. A capable reflex agent 
-will have to consider both food locations and ghost locations 
-to perform well. 
-
-Your agent should easily and reliably clear 
-the testClassic layout:
-python3 -m pacai.bin.pacman --pacman ReflexAgent --layout testClassic
-
-Try out your reflex agent on the default mediumClassic layout with one and two ghosts:
-python3 -m pacai.bin.pacman --pacman ReflexAgent --num-ghosts 1
-python3 -m pacai.bin.pacman --pacman ReflexAgent --num-ghosts 2
-
-How does your agent fare? 
-It will likely often die with 2 ghosts on the default board, 
-unless your evaluation function is quite good.
-
-Notes:
-
-You can never have more than two ghosts on mediumClassic.
-As features, try the reciprocal of important values 
-(such as distance to food) rather than just the values
-themselves.
-
-The evaluation function you're writing is evaluating
-state-action pairs; in later parts of the project, 
-you'll be evaluating states.
-Options: Default ghosts are random; you can also 
-play for fun with slightly smarter directional ghosts 
-using --ghosts DirectionalGhost. If the randomness
- is preventing you from telling whether your agent 
- is improving, you can use --seed [NUMBER] to run with 
- a seed. You can also play multiple games in a 
- row with --num-games [NUMBER]. 
- Turn off graphics with --null-graphics to run lots of
- games quickly.
-
-The autograder will check that your agent can rapidly 
-clear the openClassic layout ten times without 
-dying more than twice or thrashing around infinitely 
-(i.e. repeatedly moving back and forth between two 
-positions, making no progress).
-
-python3 -m pacai.bin.pacman --pacman ReflexAgent --layout openClassic --num-games 10 --null-graphics
-Don't spend too much time on this question, though, as the meat of the project lies ahead.
+python3 -m autograder.cli.submit pacai/student/valueIterationAgent.py pacai/student/qlearningAgents.py pacai/student/analysis.py
 
 
 
 
 
-
-Position of Pacman: This is the current position of your agent. 
-You can get this information from the game state.
-
-Positions of Ghosts: Knowing where the ghosts are can help the agent avoid them. 
-You can get this information from the game state.
-
-Positions of Food: The agent needs to know where the food is in order to eat it.
-You can get this information from the game state.
-
-Distances to Ghosts: The agent should try to keep a safe distance from the ghosts. 
-You can calculate this using the Manhattan distance between the agent and each ghost.
-
-Distances to Food: The agent should try to move towards the closest food. 
-You can calculate this using the Manhattan distance between the agent and each food pellet.
-
-Ghost States: The agent should know whether a ghost is in a scared state or not. 
-If a ghost is scared, the agent can eat it. Otherwise, the agent should avoid it.
-
-Scared Times: The agent should know how much time is left for each scared ghost. 
-This can help the agent decide whether to chase a scared ghost or avoid it.
+        # if no legal actions, return None
+        if len(self.getLegalActions(state)) == 0:
+            return None
+        # if random value is less than epsilon, return random action
+        elif flipCoin(self.epsilon):
+            return random.choice(self.getLegalActions(state))
+        # else return action with max qval
+        else:
+            return self.getPolicy(state)
 
 
-closest food from board
-checked for ghost: any ghost that are close to you
-if distance between ghost and me and less than (some #), then
-add that to score
-add or sub a certain amt to the minimum food distance and ghost distance, then divide that by score
+
+
+Question 4 (5 points)
+You will now write a q-learning agent, which does very little on construction, 
+but instead learns by trial and error from interactions with the environment through its update(state, action, nextState, reward) method.
+A stub of a q-learner is specified in pacai.student.qlearningAgents.QLearningAgent and you can select it with the command line option --agent q. 
+For this question, you must implement the update, getQValue, getValue, and getPolicy methods in QLearningAgents.
+
+Note: For getValue and getPolicy, you should break ties randomly for better behavior. The random.choice() function will help. 
+In a particular state, actions that your agent hasn't seen before still have a Q-value, specifically a Q-value of zero, and if all of the actions 
+that your agent has seen before have a negative Q-value, an unseen action may be optimal.
+
+Important: Make sure that you only access Q values by calling getQValue in your getValue and getPolicy functions. 
+This abstraction will be useful for question 9 when you override getQValue to use features of state-action pairs rather 
+than state-action pairs directly.
+
+With the q-learning update in place, you can watch your q-learner learn under manual control, using the keyboard:
+
+python3 -m pacai.bin.gridworld --agent q --episodes 5 --manual
+
+Recall that --episodes will control the number of episodes your agent gets to learn. 
+Watch how the agent learns about the state it was just in, not the one it moves to, and "leaves learning in its wake".
+
+        sample = reward + self.discountRate * self.getValue(nextState)
+        self.qValues[(state, action)] = (1 - self.alpha) * self.getQValue(state, action) + self.alpha * sample

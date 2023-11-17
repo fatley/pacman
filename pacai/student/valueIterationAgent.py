@@ -41,7 +41,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iters = iters
         self.values = {}  # A dictionary which holds the q-values for each state.
 
-        # iterations 
+        # iterations
         for i in range(iters):
             # store updated values for each state in current iter
             new_values = {}
@@ -51,8 +51,9 @@ class ValueIterationAgent(ValueEstimationAgent):
                 if self.mdp.isTerminal(state):
                     new_values[state] = 0
                 else:
-                    # if not term state, get all possible action and calculate qvalue for actions - then grab max qval
-                    new_values[state] = max([self.getQValue(state, action) for action in self.mdp.getPossibleActions(state)])
+                    # if not tstate, get all possible a's & calculate qval for a's -> grab max qval
+                    new_values[state] = max([self.getQValue(state, action)
+                                             for action in self.mdp.getPossibleActions(state)])
             # updating values for each state
             self.values = new_values
                     
@@ -66,10 +67,11 @@ class ValueIterationAgent(ValueEstimationAgent):
     # P(s'|s,a) * [R(s,a,s') + γ * V(s')]
     def getQValue(self, state, action):
         qValue = 0.0
-        # getting probability and transition state of the next possible state 
+        # getting probability and transition state of the next possible state
         for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
-            # qvalue is sum of probability *  (immediate reward + discount factor * value of next state)
-            qValue += prob * (self.mdp.getReward(state, action, nextState) + self.discountRate * self.getValue(nextState))
+            # qval is sum of prob *  (immediate reward + dfactor * val of next state)
+            qValue += prob * (self.mdp.getReward(state, action, nextState)
+                              + self.discountRate * self.getValue(nextState))
         return qValue
     
     # best action in a given state, max qvalue
@@ -79,7 +81,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         if len(possibleActions) == 0:
             return None
         # else return action with max qvalue
-        bestAction = max(possibleActions, key=lambda action: self.getQValue(state, action)) 
+        bestAction = max(possibleActions, key=lambda action: self.getQValue(state, action))
         return bestAction
         
     def getAction(self, state):

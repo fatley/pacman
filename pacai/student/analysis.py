@@ -11,66 +11,75 @@ NOT_POSSIBLE = None
 
 def question2():
     """
-    [Enter a description of what you did here.]
+    I lowered the value of noise from 0.2 to 0.01. This causes the agent to be more determinsitic
+    and less random.
     """
 
     answerDiscount = 0.9
-    answerNoise = 0.1
+    answerNoise = 0.01
 
     return answerDiscount, answerNoise
 
 def question3a():
     """
-    [Enter a description of what you did here.]
+    Lowered living reward so the agent could take the more risky path
+    Lowered noise so the agent could be more deterministic
+    Lowered discount so the agent would want immediate rewards (close exit)
     """
 
-    answerDiscount = 0.9
-    answerNoise = 0.2
-    answerLivingReward = 0.0
+    answerDiscount = 0.3
+    answerNoise = 0.01
+    answerLivingReward = -0.1
 
     return answerDiscount, answerNoise, answerLivingReward
 
 def question3b():
     """
-    [Enter a description of what you did here.]
+    Lowered the discount factor so the agent would want the closer
+    exit while increasing
+    the living reward for the agent to take a safer path.
     """
 
-    answerDiscount = 0.9
-    answerNoise = 0.2
-    answerLivingReward = 0.0
+    answerDiscount = 0.01
+    answerNoise = 0.01
+    answerLivingReward = 0.1
 
     return answerDiscount, answerNoise, answerLivingReward
 
 def question3c():
     """
-    [Enter a description of what you did here.]
+    Increased discount so agent would take a longer path for a
+    higher reward and
+    increased living reward so agent would take a safer path.
     """
 
     answerDiscount = 0.9
-    answerNoise = 0.2
-    answerLivingReward = 0.0
+    answerNoise = 0.01
+    answerLivingReward = -0.1
 
     return answerDiscount, answerNoise, answerLivingReward
 
 def question3d():
     """
-    [Enter a description of what you did here.]
+    Set living reward back to 0 so the agent would take a safer path
     """
 
     answerDiscount = 0.9
-    answerNoise = 0.2
-    answerLivingReward = 0.0
+    answerNoise = 0.3
+    answerLivingReward = 0.1
 
     return answerDiscount, answerNoise, answerLivingReward
 
 def question3e():
     """
-    [Enter a description of what you did here.]
+    Raised living reward so the agent wouldn't take a risky path and
+    increased discount so the agent would be safer for higher rewards
+    Also lowered noise for less randomness
     """
 
     answerDiscount = 0.9
-    answerNoise = 0.2
-    answerLivingReward = 0.0
+    answerNoise = 0.01
+    answerLivingReward = 1
 
     return answerDiscount, answerNoise, answerLivingReward
 
